@@ -1,0 +1,71 @@
+to compile with clang:
+clang node.c -o node.exe
+
+to compile with gcc:
+gcc node.c -o node.exe
+
+:: Node A Configurations
+node A.conf tahoe events/duplicate_ack_test.txt
+node A.conf tahoe events/timeout_test.txt
+node A.conf tahoe events/example_events.txt
+node A.conf reno events/duplicate_ack_test.txt
+node A.conf reno events/timeout_test.txt
+node A.conf reno events/example_events.txt
+node A.conf newreno events/duplicate_ack_test.txt
+node A.conf newreno events/timeout_test.txt
+node A.conf newreno events/example_events.txt
+
+:: Node B Configurations
+node B.conf tahoe events/duplicate_ack_test.txt
+node B.conf tahoe events/timeout_test.txt
+node B.conf tahoe events/example_events.txt
+node B.conf reno events/duplicate_ack_test.txt
+node B.conf reno events/timeout_test.txt
+node B.conf reno events/example_events.txt
+node B.conf newreno events/duplicate_ack_test.txt
+node B.conf newreno events/timeout_test.txt
+node B.conf newreno events/example_events.txt
+
+:: Node C Configurations
+node C.conf tahoe events/duplicate_ack_test.txt
+node C.conf tahoe events/timeout_test.txt
+node C.conf tahoe events/example_events.txt
+node C.conf reno events/duplicate_ack_test.txt
+node C.conf reno events/timeout_test.txt
+node C.conf reno events/example_events.txt
+node C.conf newreno events/duplicate_ack_test.txt
+node C.conf newreno events/timeout_test.txt
+node C.conf newreno events/example_events.txt
+
+:: Node D Configurations
+node D.conf tahoe events/duplicate_ack_test.txt
+node D.conf tahoe events/timeout_test.txt
+node D.conf tahoe events/example_events.txt
+node D.conf reno events/duplicate_ack_test.txt
+node D.conf reno events/timeout_test.txt
+node D.conf reno events/example_events.txt
+node D.conf newreno events/duplicate_ack_test.txt
+node D.conf newreno events/timeout_test.txt
+node D.conf newreno events/example_events.txt
+
+:: Node E Configurations
+node E.conf tahoe events/duplicate_ack_test.txt
+node E.conf tahoe events/timeout_test.txt
+node E.conf tahoe events/example_events.txt
+node E.conf reno events/duplicate_ack_test.txt
+node E.conf reno events/timeout_test.txt
+node E.conf reno events/example_events.txt
+node E.conf newreno events/duplicate_ack_test.txt
+node E.conf newreno events/timeout_test.txt
+node E.conf newreno events/example_events.txt
+
+:: Node F Configurations
+node F.conf tahoe events/duplicate_ack_test.txt
+node F.conf tahoe events/timeout_test.txt
+node F.conf tahoe events/example_events.txt
+node F.conf reno events/duplicate_ack_test.txt
+node F.conf reno events/timeout_test.txt
+node F.conf reno events/example_events.txt
+node F.conf newreno events/duplicate_ack_test.txt
+node F.conf newreno events/timeout_test.txt
+node F.conf newreno events/example_events.txt

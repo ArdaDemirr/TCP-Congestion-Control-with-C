@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 #include "node.h"
 
@@ -97,6 +97,7 @@ void init_tcp(TCPState *tcp, Algorithm algorithm) {
     tcp->ssthresh = 16.0;
     tcp->dup_ack_count = 0;
     tcp->round = 0;
+    tcp->recover_ack = 0; // for newReno, it is the value of the first ACK received after the timeout
 }
 
 static void print_tcp_status(TCPState *tcp, const char *event, int ack_no, const char *note) {
@@ -158,9 +159,16 @@ void on_ack(TCPState *tcp, int ack_no) {
            - partial ACK: retransmit next missing segment and stay in Fast Recovery
            - full ACK: exit Fast Recovery
         */
-        tcp->cwnd = tcp->ssthresh;
-        tcp->state = CONGESTION_AVOIDANCE;
-        print_tcp_status(tcp, "ACK", ack_no, "full ACK; exit Fast Recovery");
+        if (tcp->algorithm == ALG_NEWRENO && ack_no < tcp->recover_ack) {
+            /* Partial ACK: stay in Fast Recovery, inflate window by 1 */
+            tcp->cwnd += 1.0;
+            print_tcp_status(tcp, "ACK", ack_no, "partial ACK; stay in Fast Recovery");
+        } else {
+            /* Full ACK: exit Fast Recovery */
+            tcp->cwnd = tcp->ssthresh;
+            tcp->state = CONGESTION_AVOIDANCE;
+            print_tcp_status(tcp, "ACK", ack_no, "full ACK; exit Fast Recovery");
+        }
     }
 }
 
@@ -203,6 +211,9 @@ void on_duplicate_ack(TCPState *tcp, int ack_no) {
         print_tcp_status(tcp, "DUPACK", ack_no, "3 duplicate ACKs; Reno Fast Recovery");
     }
     else if (tcp->algorithm == ALG_NEWRENO) {
+        // Estimate highest sent packet based on current window
+        tcp->recover_ack = ack_no + (int)tcp->cwnd;
+
         tcp->cwnd = tcp->ssthresh + 3.0;
         tcp->state = FAST_RECOVERY;
         print_tcp_status(tcp, "DUPACK", ack_no, "3 duplicate ACKs; NewReno Fast Recovery");

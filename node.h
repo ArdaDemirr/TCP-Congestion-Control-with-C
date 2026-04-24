@@ -44,6 +44,7 @@ typedef struct {
     double ssthresh;
     int dup_ack_count;
     int round;
+    int recover_ack; // for newReno
 } TCPState;
 
 // load config function

@@ -84,6 +84,12 @@ int load_config(const char *filename, NodeConfig *config) {
     return 1;
 }
 
+/*
+   Initialize TCP state
+
+   it always begins in the Slow Start phase. We set the initial congestion window ($cwnd$) to 1.0 packet,
+   and the slow-start threshold ($ssthresh$) to 16.0. Our duplicate ACK counter is at zero
+*/
 void init_tcp(TCPState *tcp, Algorithm algorithm) {
     tcp->algorithm = algorithm;
     tcp->state = SLOW_START;
@@ -104,6 +110,20 @@ static void print_tcp_status(TCPState *tcp, const char *event, int ack_no, const
            note);
 }
 
+/*
+   Handle ACK event
+
+   - Slow Start:
+     cwnd increases by 1 for each new ACK
+     When cwnd >= ssthresh, switch to Congestion Avoidance
+
+   - Congestion Avoidance:
+     cwnd increases by 1/cwnd for each new ACK (additive increase)
+
+   - Fast Recovery:
+     Reno: full ACK exits Fast Recovery, cwnd = ssthresh
+
+*/
 void on_ack(TCPState *tcp, int ack_no) {
     tcp->round++;
     tcp->dup_ack_count = 0;
@@ -121,6 +141,13 @@ void on_ack(TCPState *tcp, int ack_no) {
         tcp->cwnd += 1.0 / tcp->cwnd;
         print_tcp_status(tcp, "ACK", ack_no, "new ACK received; additive increase");
     }
+
+    /*
+    In Fast Recovery, we are already in a “semi-congested” state, so we don’t want to reduce the window
+    aggressively. Instead, we keep the window at $ssthresh + 3.0$ and wait for the next ACK.
+    If we receive a full ACK (one that acknowledges all packets up to the one that was lost),
+    it means the congestion has cleared. At this point, we exit Fast Recovery and return to Congestion Avoidance.
+    */
     else if (tcp->state == FAST_RECOVERY) {
         /*
            Reno:
@@ -137,13 +164,24 @@ void on_ack(TCPState *tcp, int ack_no) {
     }
 }
 
+/*
+   Handle duplicate ACK event
+
+   - Three duplicate ACKs indicate likely packet loss.
+   - Reno: sets cwnd to ssthresh + 3 and enters Fast Recovery
+
+   If we get 1 or 2 duplicate ACKs, we do nothing and wait. But if we receive exactly 3 duplicate ACKs,
+   TCP Reno knows a packet was dropped. First, it cuts the threshold in half ($ssthresh = \frac{cwnd}{2}$). Then,
+   instead of dropping the window back to 1 like Tahoe, Reno sets $cwnd = ssthresh + 3.0$ and enters Fast Recovery.
+   This makes Reno much faster at recovering from single packet losses
+*/
 void on_duplicate_ack(TCPState *tcp, int ack_no) {
     tcp->round++;
     tcp->dup_ack_count++;
 
     if (tcp->dup_ack_count < 3) {
         print_tcp_status(tcp, "DUPACK", ack_no, "duplicate ACK received; waiting");
-        return;
+        return; // wait for more duplicate ACKs
     }
 
     /*
@@ -171,6 +209,16 @@ void on_duplicate_ack(TCPState *tcp, int ack_no) {
     }
 }
 
+/*
+   Handle timeout event
+
+   - Reno reset cwnd to 1 and enter Slow Start
+   - ssthresh is set to half of the previous cwnd
+
+   If a severe network traffic jam happens and we get a Timeout, 
+   it cuts the threshold in half, drops the window all the way down to 1.0,
+   and restarts the entire process from Slow Start.
+*/
 void on_timeout(TCPState *tcp) {
     tcp->round++;
 

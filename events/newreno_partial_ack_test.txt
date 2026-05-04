@@ -1,0 +1,32 @@
+# NewReno partial ACK test
+# Demonstrates NewReno's advantage: partial ACKs keep it in Fast Recovery
+# while Reno exits immediately
+ACK 1
+ACK 2
+ACK 3
+ACK 4
+ACK 5
+ACK 6
+ACK 7
+ACK 8
+ACK 9
+ACK 10
+ACK 11
+ACK 12
+ACK 13
+ACK 14
+ACK 15
+ACK 16
+# Triple DUPACK triggers Fast Recovery
+DUPACK 16
+DUPACK 16
+DUPACK 16
+# Partial ACKs: < recover_ack for NewReno
+ACK 18
+ACK 20
+ACK 22
+ACK 24
+# Full ACK exits Fast Recovery
+ACK 35
+ACK 36
+ACK 37

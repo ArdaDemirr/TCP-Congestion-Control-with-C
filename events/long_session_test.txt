@@ -1,0 +1,52 @@
+# Long session test: Multiple loss events over extended transmission
+# Shows full lifecycle of cwnd evolution with repeated congestion
+ACK 1
+ACK 2
+ACK 3
+ACK 4
+ACK 5
+ACK 6
+ACK 7
+ACK 8
+ACK 9
+ACK 10
+ACK 11
+ACK 12
+ACK 13
+ACK 14
+ACK 15
+ACK 16
+ACK 17
+ACK 18
+# First loss: triple DUPACK
+DUPACK 18
+DUPACK 18
+DUPACK 18
+ACK 19
+ACK 20
+ACK 21
+ACK 22
+ACK 23
+ACK 24
+ACK 25
+ACK 26
+ACK 27
+# Second loss: timeout
+TIMEOUT
+ACK 28
+ACK 29
+ACK 30
+ACK 31
+ACK 32
+ACK 33
+ACK 34
+ACK 35
+ACK 36
+# Third loss: triple DUPACK again
+DUPACK 36
+DUPACK 36
+DUPACK 36
+ACK 37
+ACK 38
+ACK 39
+ACK 40

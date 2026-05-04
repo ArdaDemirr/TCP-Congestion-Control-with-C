@@ -1,0 +1,41 @@
+# Comparison test: Shows clear differences between Tahoe, Reno, and NewReno
+# Run with all 3 algorithms to compare behavior
+# Phase 1: Slow Start (cwnd grows 1->16)
+ACK 1
+ACK 2
+ACK 3
+ACK 4
+ACK 5
+ACK 6
+ACK 7
+ACK 8
+ACK 9
+ACK 10
+ACK 11
+ACK 12
+ACK 13
+ACK 14
+ACK 15
+# Phase 2: Congestion Avoidance
+ACK 16
+ACK 17
+# Phase 3: Triple duplicate ACK (packet loss)
+DUPACK 17
+DUPACK 17
+DUPACK 17
+# Phase 4: Partial ACKs (NewReno stays in FR, Reno exits immediately)
+ACK 18
+ACK 20
+ACK 22
+# Phase 5: Full ACK (NewReno exits FR here)
+ACK 35
+ACK 36
+# Phase 6: Timeout (all algorithms reset to cwnd=1)
+TIMEOUT
+# Phase 7: Recovery from timeout
+ACK 37
+ACK 38
+ACK 39
+ACK 40
+ACK 41
+ACK 42
